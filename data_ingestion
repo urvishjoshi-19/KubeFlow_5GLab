@@ -1,0 +1,25 @@
+from flask import Flask, request, jsonify
+import os
+
+app = Flask(__name__)
+
+data_dir = "data"
+os.makedirs(data_dir, exist_ok=True)
+
+@app.route("/ingest", methods=["POST"])
+def ingest_data():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data received"}), 400
+        
+        file_path = os.path.join(data_dir, "ingested_data.json")
+        with open(file_path, "a") as f:
+            f.write(str(data) + "\n")
+        
+        return jsonify({"message": "Data ingested successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
